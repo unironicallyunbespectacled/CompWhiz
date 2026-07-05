@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>THE STACK PROTOCOL · 90-Day Systems Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080B12;
+  --bg2:#0D1220;
+  --panel:rgba(255,255,255,.025);
+  --cyan:#4FD1C5;
+  --amber:#F0A860;
+  --violet:#A78BFA;
+  --green:#3FB950;
+  --red:#F0656B;
+  --ink:#E8EDF4;
+  --im:#8892A6;
+  --id:#4A5268;
+  --border:rgba(79,209,197,.14);
+  --r:10px;
+  --rl:16px;
+  --mono:'JetBrains Mono', monospace;
+  --sans:'Inter', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(79,209,197,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(79,209,197,.035) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 30%,transparent 75%);
+}
+#net{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wrap{max-width:1360px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+section{margin-bottom:60px}
+::selection{background:rgba(79,209,197,.25);color:#fff}
+
+nav{position:sticky;top:0;z-index:200;background:rgba(8,11,18,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.05);padding:10px 24px;display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap}
+nav a{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--im);text-decoration:none;transition:color .2s}
+nav a::before{content:'./ '}
+nav a:hover{color:var(--cyan)}
+
+.hero{text-align:center;padding:64px 24px 40px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1px;color:var(--cyan);opacity:.85;margin-bottom:22px;display:inline-flex;align-items:center;gap:2px;cursor:default}
+.eyebrow .cur{display:inline-block;width:7px;height:14px;background:var(--cyan);animation:blink 1s step-end infinite;margin-left:2px}
+@keyframes blink{50%{opacity:0}}
+.hero-title{font-family:var(--mono);font-size:clamp(26px,5.6vw,64px);font-weight:800;line-height:1.08;letter-spacing:-1px;
+  background:linear-gradient(135deg,#5EEAD4,#4FD1C5 45%,#38BDF8 70%,#818CF8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(79,209,197,.2));margin-bottom:14px;cursor:pointer;user-select:none}
+.hero-sub{font-family:var(--mono);font-size:clamp(10px,1.4vw,13px);color:var(--im);letter-spacing:1.5px;margin-bottom:8px}
+.hero-quote{font-size:12px;color:var(--id);font-style:italic;min-height:18px;margin-bottom:32px;transition:opacity .3s}
+
+.countdown{display:inline-flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:var(--rl);
+  padding:18px 30px;backdrop-filter:blur(10px);margin-bottom:32px}
+.cd-unit{text-align:center;min-width:56px}
+.cd-num{font-family:var(--mono);font-size:clamp(24px,3.6vw,44px);font-weight:700;color:var(--cyan);line-height:1;display:block}
+.cd-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--id);margin-top:4px;font-family:var(--mono)}
+.cd-sep{font-family:var(--mono);font-size:12px;color:var(--im);align-self:center;margin-bottom:14px}
+
+.stats-bar{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:28px}
+.s-pill{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--border);border-radius:100px;padding:8px 18px;transition:all .2s}
+.s-pill:hover{border-color:var(--cyan);background:rgba(79,209,197,.06)}
+.s-icon{font-family:var(--mono);font-size:13px;color:var(--im)}
+.s-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--cyan);line-height:1}
+.s-lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--id);font-family:var(--mono)}
+
+.xp-wrap{max-width:560px;margin:0 auto 44px}
+.xp-top{display:flex;justify-content:space-between;margin-bottom:6px;font-family:var(--mono);font-size:10px;color:var(--im)}
+.xp-track{height:6px;background:rgba(255,255,255,.05);border-radius:100px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:100px;transition:width .7s cubic-bezier(.34,1.56,.64,1);min-width:0}
+
+.day-nav{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:14px}
+.day-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--cyan);font-family:var(--mono);
+  font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.day-btn:hover{border-color:var(--cyan);background:rgba(79,209,197,.08)}
+.day-disp{font-family:var(--mono);font-size:13px;color:var(--ink);min-width:190px;text-align:center}
+.today-btn{background:rgba(79,209,197,.08);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-family:var(--mono);
+  font-size:9px;letter-spacing:1px;color:var(--cyan);cursor:pointer;transition:all .2s}
+.today-btn:hover{background:rgba(79,209,197,.18)}
+
+.commit-wrap{max-width:900px;margin:0 auto}
+.commit-grid{display:grid;grid-template-columns:repeat(25,1fr);gap:3px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:var(--r)}
+.commit-cell{aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04);cursor:pointer;transition:transform .15s;font-size:0}
+.commit-cell:hover{transform:scale(1.3)}
+.commit-cell.done{background:var(--cyan)}
+.commit-cell.partial{background:rgba(79,209,197,.4)}
+.commit-cell.current{outline:2px solid var(--amber);outline-offset:1px}
+.commit-cell.future{background:rgba(255,255,255,.02)}
+.commit-legend{display:flex;justify-content:flex-end;gap:6px;align-items:center;margin-top:10px;font-family:var(--mono);font-size:8px;color:var(--id)}
+.leg-sq{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+.sec-head{text-align:center;margin-bottom:34px}
+.sec-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);opacity:.7;margin-bottom:10px}
+.sec-title{font-family:var(--mono);font-size:clamp(20px,3vw,32px);font-weight:700;letter-spacing:-.5px}
+.sec-desc{font-size:13px;color:var(--im);max-width:560px;margin:10px auto 0;line-height:1.6}
+
+.phase-bar{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:36px}
+.ph-chip{font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:100px;border:1px solid;opacity:.4;transition:all .2s}
+.ph-chip.active{opacity:1}
+
+.domain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(390px,1fr));gap:20px}
+.dc{background:linear-gradient(160deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid var(--border);border-radius:var(--rl);
+  padding:22px;position:relative;overflow:hidden;animation:rise .5s backwards}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.dc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--dc,var(--cyan))}
+.dc-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+.dc-glyph{width:44px;height:44px;border-radius:9px;background:var(--dc-glow,rgba(79,209,197,.13));border:1px solid var(--dc,var(--cyan));
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:17px;font-weight:700;color:var(--dc,var(--cyan));flex-shrink:0}
+.dc-meta{flex:1;min-width:0}
+.dc-name{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ink)}
+.dc-tag{font-size:11px;color:var(--im);margin-top:2px}
+.dc-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.sess-btn{background:rgba(79,209,197,.1);border:1px solid var(--dc,var(--cyan));color:var(--dc,var(--cyan));font-family:var(--mono);
+  font-size:9px;letter-spacing:.5px;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.sess-btn:hover{background:var(--dc,var(--cyan));color:#080B12}
+.phase-pill{font-family:var(--mono);font-size:8px;letter-spacing:1px;padding:3px 9px;border-radius:100px;background:rgba(255,255,255,.05);color:var(--im)}
+
+.dc-prog-wrap{margin-bottom:14px}
+.dc-prog-top{display:flex;justify-content:space-between;margin-bottom:5px;font-family:var(--mono);font-size:9px;color:var(--im)}
+.dc-prog-pct{color:var(--dc,var(--cyan));font-weight:700}
+.dc-track{height:5px;background:rgba(255,255,255,.05);border-radius:100px;overflow:hidden}
+.dc-fill{height:100%;background:var(--dc,var(--cyan));border-radius:100px;transition:width .5s ease}
+
+.dc-res{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;margin-bottom:16px}
+.res-title{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--id);margin-bottom:7px}
+.res-list{display:flex;flex-direction:column;gap:5px}
+.res-a{display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:var(--ink);font-size:12px;padding:4px 0;
+  border-bottom:1px solid rgba(255,255,255,.03);transition:color .15s}
+.res-a:last-child{border-bottom:none}
+.res-a:hover{color:var(--dc,var(--cyan))}
+.res-a span:first-child::before{content:'↳ ';color:var(--id)}
+.res-type{font-family:var(--mono);font-size:8px;color:var(--id);letter-spacing:.5px;flex-shrink:0;margin-left:8px}
+
+.task-section{border-top:1px dashed rgba(255,255,255,.08);padding-top:14px}
+.task-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.task-title-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--im)}
+.task-xp-total{font-family:var(--mono);font-size:9px;color:var(--dc,var(--cyan))}
+.task-row{display:flex;align-items:flex-start;gap:10px;padding:9px 8px;border-radius:7px;cursor:pointer;transition:background .15s;margin-bottom:2px}
+.task-row:hover{background:rgba(255,255,255,.025)}
+.t-chk{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--id);flex-shrink:0;margin-top:2px;transition:all .15s;position:relative}
+.task-row.done .t-chk{background:var(--dc,var(--cyan));border-color:var(--dc,var(--cyan))}
+.task-row.done .t-chk::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#080B12;font-weight:700}
+.task-body{flex:1;min-width:0}
+.task-name{font-size:12.5px;color:var(--ink);line-height:1.4}
+.task-row.done .task-name{color:var(--im);text-decoration:line-through;text-decoration-color:var(--id)}
+.task-desc{font-size:11px;color:var(--id);line-height:1.45;margin-top:2px}
+.task-xp-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:5px;flex-shrink:0;margin-top:1px}
+.xp-build{background:rgba(63,185,80,.12);color:var(--green)}
+.xp-read{background:rgba(79,209,197,.12);color:var(--cyan)}
+.xp-drill{background:rgba(240,168,96,.12);color:var(--amber)}
+.xp-ship{background:rgba(167,139,250,.12);color:var(--violet)}
+.xp-git{background:rgba(240,101,107,.12);color:var(--red)}
+.xp-debug{background:rgba(240,168,96,.12);color:var(--amber)}
+
+.badge-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.badge{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:100px;padding:8px 16px;opacity:.3;transition:all .3s}
+.badge.unlocked{opacity:1;border-color:var(--cyan)}
+.badge-icon{font-size:16px}
+.badge-txt{font-family:var(--mono);font-size:9px;color:var(--im)}
+.badge.unlocked .badge-txt{color:var(--cyan)}
+
+.gh-bar{display:flex;justify-content:center;margin-bottom:8px}
+.gh-btn{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:100px;padding:7px 16px;
+  cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--im);transition:all .2s}
+.gh-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.gh-dot{width:6px;height:6px;border-radius:50%;background:var(--id)}
+.gh-dot.synced{background:var(--green)}
+.gh-dot.syncing{background:var(--amber);animation:blink .8s step-end infinite}
+.gh-dot.error{background:var(--red)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:28px;max-width:400px;width:100%}
+.modal h3{font-family:var(--mono);font-size:14px;margin-bottom:6px;color:var(--cyan)}
+.modal p{font-size:11.5px;color:var(--im);margin-bottom:18px;line-height:1.6}
+.modal label{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--im);display:block;margin-bottom:5px;margin-top:12px}
+.modal input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:7px;padding:9px 11px;color:var(--ink);font-family:var(--mono);font-size:12px}
+.modal input:focus{outline:none;border-color:var(--cyan)}
+.modal-btns{display:flex;gap:10px;margin-top:22px}
+.modal-btns button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--im);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .2s}
+.modal-btns .primary{background:var(--cyan);color:#080B12;border-color:var(--cyan);font-weight:700}
+.modal-btns button:hover{opacity:.85}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg2);border:1px solid var(--cyan);
+  border-radius:10px;padding:12px 22px;font-family:var(--mono);font-size:12px;color:var(--ink);z-index:600;opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.reset-wrap{text-align:center;margin-top:50px}
+#reset-btn{background:transparent;border:1px solid rgba(240,101,107,.3);color:var(--red);font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  padding:8px 18px;border-radius:100px;cursor:pointer;transition:all .2s;opacity:.6}
+#reset-btn:hover{opacity:1;background:rgba(240,101,107,.08)}
+
+footer{text-align:center;padding:30px 20px;font-family:var(--mono);font-size:9px;color:var(--id);letter-spacing:1px}
+
+@media(max-width:640px){
+  .commit-grid{grid-template-columns:repeat(10,1fr)}
+  .dc-head{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<canvas id="net"></canvas>
+
+<nav>
+  <a href="#tracks">Tracks</a>
+  <a href="#build-log">Build Log</a>
+  <a href="#badges">Badges</a>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow" id="boot-line">$ <span id="boot-text"></span><span class="cur"></span></div>
+    <h1 class="hero-title" id="hero-title" title="click me">THE STACK PROTOCOL</h1>
+    <div class="hero-sub">50 DAYS · ZERO TO SHIPPING ENGINEER · SIX PARALLEL TRACKS</div>
+    <div class="hero-quote" id="hero-quote">every senior engineer was once a person who refused to close the tab.</div>
+
+    <div class="countdown">
+      <div class="cd-unit"><span class="cd-num" id="cd-d">01</span><span class="cd-lbl">Day</span></div>
+      <div class="cd-sep">/</div>
+      <div class="cd-unit"><span class="cd-num">50</span><span class="cd-lbl">Total</span></div>
+      <div class="cd-sep">·</div>
+      <div class="cd-unit"><span class="cd-num" id="cd-left">49</span><span class="cd-lbl">Remaining</span></div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="s-pill"><span class="s-icon">XP</span><span class="s-val" id="stat-xp">0</span><span class="s-lbl">Total</span></div>
+      <div class="s-pill"><span class="s-icon">🔥</span><span class="s-val" id="stat-streak">1</span><span class="s-lbl">Streak</span></div>
+      <div class="s-pill"><span class="s-icon">✓</span><span class="s-val" id="stat-tasks">0</span><span class="s-lbl">Commits</span></div>
+      <div class="s-pill"><span class="s-icon">◆</span><span class="s-val" id="stat-res">24</span><span class="s-lbl">Resources</span></div>
+    </div>
+
+    <div class="xp-wrap">
+      <div class="xp-top"><span>LEVEL <span id="lvl-num">1</span></span><span id="xp-txt">0 / 500 XP</span></div>
+      <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="gh-bar">
+      <div class="gh-btn" onclick="openGHModal()">
+        <span class="gh-dot" id="gh-dot"></span>
+        <span id="gh-label">SYNC</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="build-log">
+    <div class="sec-head">
+      <div class="sec-eyebrow">Build Log</div>
+      <div class="sec-title">50-Day Commit Graph</div>
+      <div class="sec-desc">Each cell is a day. Click any day to jump there. Fill it in like you'd fill a contribution graph — the goal is no gaps.</div>
+    </div>
+    <div class="day-nav">
+      <button class="day-btn" id="day-prev">‹</button>
+      <div class="day-disp" id="day-disp">Day 1 · Bootstrap Phase</div>
+      <button class="day-btn" id="day-next">›</button>
+      <button class="today-btn" id="today-btn">TODAY</button>
+    </div>
+    <div class="commit-wrap">
+      <div class="commit-grid" id="commit-grid"></div>
+      <div class="commit-legend">
+        <span>less</span>
+        <span class="leg-sq" style="background:rgba(255,255,255,.04)"></span>
+        <span class="leg-sq" style="background:rgba(79,209,197,.4)"></span>
+        <span class="leg-sq" style="background:var(--cyan)"></span>
+        <span>more</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="tracks">
+    <div class="sec-head">
+      <div class="sec-eyebrow">Six Parallel Tracks</div>
+      <div class="sec-title" id="phase-title">Phase 1 · Bootstrap</div>
+      <div class="sec-desc" id="phase-desc">Environment, syntax, the shape of a program. Nothing here is optional — this is the floor everything else stands on.</div>
+    </div>
+    <div class="phase-bar" id="phase-bar"></div>
+    <div class="domain-grid" id="domain-grid"></div>
+  </section>
+
+  <section id="badges">
+    <div class="sec-head">
+      <div class="sec-eyebrow">Achievements</div>
+      <div class="sec-title">Unlocked Along the Way</div>
+    </div>
+    <div class="badge-row" id="badge-row"></div>
+  </section>
+
+  <div class="reset-wrap">
+    <button id="reset-btn">RESET ALL PROGRESS</button>
+  </div>
+
+  <footer>THE STACK PROTOCOL · BUILT FOR THE LONG RUN · v1.0</footer>
+</div>
+
+<div class="modal-overlay" id="gh-overlay">
+  <div class="modal">
+    <h3>☁ GitHub Sync</h3>
+    <p>Store your progress.json in a GitHub repo so it survives across devices. Create a fine-grained personal access token with read/write access to Contents on the repo you choose.</p>
+    <label>GitHub Username</label>
+    <input id="gh-user" placeholder="unironicallyunbespectacled"/>
+    <label>Repository Name</label>
+    <input id="gh-repo" placeholder="stack-protocol-progress"/>
+    <label>Personal Access Token</label>
+    <input id="gh-token" type="password" placeholder="github_pat_..."/>
+    <div class="modal-btns">
+      <button onclick="closeGHModal()">Cancel</button>
+      <button class="primary" onclick="saveGHConfig()">Connect</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+
+/* ═══════════════════════════════════════════════════════
+   DATA: SIX TRACKS × FOUR PHASES
+   All resource links independently verified as of build time.
+   Compiler-pipeline phase names are intentional: bootstrap the
+   environment, compile the fundamentals, link them into systems, ship.
+   ═══════════════════════════════════════════════════════ */
+
+const PHASES = [
+  { key:'boot', nm:'Bootstrap', s:1, e:10, c:'#4FD1C5', desc:"Environment, syntax, the shape of a program. Nothing here is optional — this is the floor everything else stands on." },
+  { key:'compile', nm:'Compile', s:11, e:25, c:'#F0A860', desc:"Real projects, real errors. This is where you stop copying examples and start debugging your own broken logic." },
+  { key:'link', nm:'Link', s:26, e:40, c:'#A78BFA', desc:"Systems thinking. How pieces talk to each other — the terminal, the network, the machine underneath the language." },
+  { key:'ship', nm:'Ship', s:41, e:50, c:'#3FB950', desc:"Portfolio, open source, interview reps. Prove it publicly — a skill nobody can see is a skill nobody can hire." }
+];
+
+const TRACKS = [
+  {
+    id:'foundations', nm:'Programming Foundations', gl:'{ }', tag:'Python · logic · control flow',
+    cl:'#4FD1C5',
+    rs:[
+      ['CS50x — Harvard\'s Intro to CS', 'https://cs50.harvard.edu/x/', 'Course'],
+      ['Python for Everybody', 'https://www.py4e.com/', 'Course'],
+      ['freeCodeCamp', 'https://www.freecodecamp.org/', 'Practice'],
+      ['Exercism', 'https://exercism.org/', 'Mentored Drills']
+    ],
+    phases:{
+      boot:[
+        { n:'CS50x Week 0 + 1 — Scratch then C', d:'cs50.harvard.edu/x: complete Week 0 (Scratch, no code) and Week 1 (C basics: variables, conditionals, loops). Finish both problem sets.', t:60, x:'https://cs50.harvard.edu/x/', u:'build' },
+        { n:'Python for Everybody — Ch.1–3', d:'py4e.com: work through Why Program, Variables/Expressions/Statements, and Conditional Execution. Type every example yourself, never copy-paste.', t:45, x:'https://www.py4e.com/', u:'read' },
+        { n:'Exercism Python track — 5 easy exercises', d:'exercism.org: join the Python track, request mentoring, and solve 5 easy exercises. Read the community solutions after each one.', t:50, x:'https://exercism.org/', u:'drill' }
+      ],
+      compile:[
+        { n:'CS50x Week 3 — Algorithms', d:'Complete Week 3: search and sort algorithms, Big-O intuition. Implement bubble sort and binary search from scratch without looking it up.', t:65, x:'https://cs50.harvard.edu/x/', u:'build' },
+        { n:'Build a CLI tool solving a real problem of yours', d:'Pick a genuinely annoying repetitive task in your own life and automate it in Python. Ship something that runs, not a tutorial clone.', t:70, x:'https://www.freecodecamp.org/', u:'ship' },
+        { n:'Exercism — 5 medium exercises + mentor feedback', d:'Move to medium-difficulty problems. Actually wait for and read mentor feedback before marking done — that\'s the whole point of the platform.', t:55, x:'https://exercism.org/', u:'drill' }
+      ],
+      link:[
+        { n:'CS50x Week 5 — Data Structures', d:'Complete Week 5: linked lists, trees, hash tables in C. Draw each structure by hand before you code it.', t:65, x:'https://cs50.harvard.edu/x/', u:'build' },
+        { n:'freeCodeCamp — Scientific Computing with Python cert', d:'Complete one full freeCodeCamp Python certification project end to end, including the automated tests.', t:70, x:'https://www.freecodecamp.org/learn', u:'build' },
+        { n:'Debug session — break your own CLI tool on purpose', d:'Introduce 5 deliberate bugs into your earlier CLI project. Fix each using print debugging first, then a real debugger.', t:45, x:'https://exercism.org/', u:'debug' }
+      ],
+      ship:[
+        { n:'CS50x Final Project — pick your own idea', d:'Scope and build the CS50 final project. Small and finished beats large and abandoned. Push it to GitHub with a real README.', t:80, x:'https://cs50.harvard.edu/x/', u:'ship' },
+        { n:'Exercism — earn track badge on 3 languages total', d:'Take what you learned in Python and repeat 3 exercises each in two other Exercism tracks. Notice what transfers and what doesn\'t.', t:50, x:'https://exercism.org/', u:'drill' },
+        { n:'Write a README that explains your reasoning, not just usage', d:'Rewrite your CS50 project README to explain the design decisions and trade-offs, not just how to run it. This is a portfolio skill.', t:35, x:'https://www.freecodecamp.org/', u:'ship' }
+      ]
+    }
+  },
+  {
+    id:'web', nm:'Web Development', gl:'</>', tag:'HTML · CSS · JS · full-stack',
+    cl:'#F0A860',
+    rs:[
+      ['The Odin Project', 'https://www.theodinproject.com/', 'Full Curriculum'],
+      ['Full Stack Open', 'https://fullstackopen.com/en/', 'React/Node'],
+      ['MDN Web Docs', 'https://developer.mozilla.org/', 'Reference'],
+      ['Frontend Mentor', 'https://www.frontendmentor.io/', 'Real Briefs']
+    ],
+    phases:{
+      boot:[
+        { n:'The Odin Project — Foundations: HTML & CSS', d:'theodinproject.com: complete the Foundations course HTML/CSS section fully, including every project checkpoint.', t:55, x:'https://www.theodinproject.com/', u:'build' },
+        { n:'MDN — read the Box Model and Flexbox guides', d:'developer.mozilla.org: read the CSS Box Model and Flexbox guides start to finish. Rebuild 3 layouts from memory afterward.', t:35, x:'https://developer.mozilla.org/', u:'read' },
+        { n:'Frontend Mentor — 2 free-tier HTML/CSS challenges', d:'frontendmentor.io: complete 2 beginner-level challenges from static designs. No frameworks yet — vanilla only.', t:60, x:'https://www.frontendmentor.io/', u:'build' }
+      ],
+      compile:[
+        { n:'The Odin Project — Foundations: JavaScript Basics', d:'Complete the JavaScript Basics section: functions, arrays, objects, DOM manipulation. Finish the Rock Paper Scissors project.', t:65, x:'https://www.theodinproject.com/', u:'build' },
+        { n:'Frontend Mentor — 1 intermediate JS-interactive challenge', d:'Pick a challenge that requires actual JavaScript logic, not just layout. Get the interaction working before touching CSS polish.', t:60, x:'https://www.frontendmentor.io/', u:'build' },
+        { n:'MDN — Asynchronous JavaScript guide', d:'Read the full Asynchronous JavaScript module: callbacks, promises, async/await. Write 3 tiny fetch-based demos.', t:45, x:'https://developer.mozilla.org/', u:'read' }
+      ],
+      link:[
+        { n:'Full Stack Open — Part 1 & 2: React fundamentals', d:'fullstackopen.com: complete Part 1 (React basics) and Part 2 (rendering lists, forms, communicating with servers).', t:70, x:'https://fullstackopen.com/en/', u:'build' },
+        { n:'Full Stack Open — Part 3: Node.js + Express backend', d:'Build the backend for the Phonebook exercise: a real Express API talking to a database, deployed.', t:75, x:'https://fullstackopen.com/en/', u:'build' },
+        { n:'The Odin Project — Databases module', d:'Complete the Databases section of the Foundations/Full Stack path. Actually connect a project to a real database.', t:55, x:'https://www.theodinproject.com/', u:'build' }
+      ],
+      ship:[
+        { n:'Ship a full-stack app with auth, live on the internet', d:'Combine everything: React frontend, Express/Node backend, database, basic auth. Deploy it somewhere reachable by URL.', t:85, x:'https://fullstackopen.com/en/', u:'ship' },
+        { n:'Frontend Mentor — 1 advanced challenge, pixel-accurate', d:'Match the provided design file measurement-for-measurement. This is the discipline that separates hobbyists from hires.', t:60, x:'https://www.frontendmentor.io/', u:'build' },
+        { n:'Write deployment notes + architecture diagram', d:'Document how your full-stack app is deployed and how its pieces talk to each other. A future employer will ask this in interviews.', t:40, x:'https://developer.mozilla.org/', u:'ship' }
+      ]
+    }
+  },
+  {
+    id:'dsa', nm:'Data Structures & Algorithms', gl:'◆', tag:'Big-O · patterns · interview core',
+    cl:'#A78BFA',
+    rs:[
+      ['NeetCode', 'https://neetcode.io/', 'Curated Roadmap'],
+      ['LeetCode', 'https://leetcode.com/', 'Practice'],
+      ['VisuAlgo', 'https://visualgo.net/', 'Visualizations'],
+      ['Big-O Cheat Sheet', 'https://www.bigocheatsheet.com/', 'Reference']
+    ],
+    phases:{
+      boot:[
+        { n:'VisuAlgo — watch Array, Linked List, Stack, Queue', d:'visualgo.net: step through the visualizations for each structure at slow speed. Narrate out loud what happens at each step.', t:35, x:'https://visualgo.net/', u:'read' },
+        { n:'NeetCode roadmap — Arrays & Hashing section', d:'neetcode.io/roadmap: solve every problem in the Arrays & Hashing section. Watch the explanation only after attempting.', t:55, x:'https://neetcode.io/', u:'drill' },
+        { n:'Big-O Cheat Sheet — memorize the common complexities', d:'bigocheatsheet.com: write out from memory the time complexity of every common data structure operation. Check against the sheet.', t:30, x:'https://www.bigocheatsheet.com/', u:'read' }
+      ],
+      compile:[
+        { n:'NeetCode roadmap — Two Pointers & Sliding Window', d:'Solve every problem in both sections. These two patterns alone solve a huge fraction of interview questions.', t:60, x:'https://neetcode.io/', u:'drill' },
+        { n:'LeetCode — 10 Easy problems, no hints', d:'leetcode.com: solve 10 Easy-difficulty problems cold, timing yourself. Note which topic areas are consistently slow for you.', t:65, x:'https://leetcode.com/', u:'drill' },
+        { n:'VisuAlgo — Trees & Binary Search Trees', d:'Step through tree traversal visualizations (inorder, preorder, postorder, BFS). Implement all four traversals from scratch after.', t:45, x:'https://visualgo.net/', u:'build' }
+      ],
+      link:[
+        { n:'NeetCode roadmap — Graphs & Dynamic Programming', d:'These are the two hardest topic areas for most learners. Budget extra time. Solve every problem in both sections.', t:75, x:'https://neetcode.io/', u:'drill' },
+        { n:'LeetCode — 8 Medium problems across 4 different patterns', d:'Deliberately pick problems spanning different patterns rather than grinding one topic. Breadth matters more than depth here.', t:70, x:'https://leetcode.com/', u:'drill' },
+        { n:'Re-implement your Week 1 solutions with better complexity', d:'Go back to your earliest solved problems. Rewrite 5 of them with better time or space complexity now that you know more.', t:45, x:'https://leetcode.com/', u:'debug' }
+      ],
+      ship:[
+        { n:'LeetCode — 5 Medium problems under real interview time pressure', d:'Set a 30-minute timer per problem, no hints, explain your approach out loud as if in an interview. Record yourself if possible.', t:70, x:'https://leetcode.com/', u:'drill' },
+        { n:'NeetCode roadmap — finish remaining sections', d:'Clear whatever sections of the roadmap remain: Heaps, Intervals, Advanced Graphs, Tries. You want no visible gaps.', t:75, x:'https://neetcode.io/', u:'drill' },
+        { n:'Write your own explanation for 3 problems you solved', d:'Pick 3 of your hardest solves and write a plain-language explanation of the approach, as if teaching someone else.', t:40, x:'https://neetcode.io/', u:'ship' }
+      ]
+    }
+  },
+  {
+    id:'theory', nm:'CS Theory & Systems', gl:'Σ', tag:'OS · architecture · the why',
+    cl:'#3FB950',
+    rs:[
+      ['OSSU Computer Science', 'https://github.com/ossu/computer-science', 'Full Curriculum'],
+      ['Teach Yourself CS', 'https://teachyourselfcs.com/', 'Reading List'],
+      ['MIT OpenCourseWare', 'https://ocw.mit.edu/', 'Lectures'],
+      ['Nand2Tetris', 'https://www.nand2tetris.org/', 'Build a Computer']
+    ],
+    phases:{
+      boot:[
+        { n:'Teach Yourself CS — read the introduction + pick your first book', d:'teachyourselfcs.com: read the full intro on why theory matters, then choose your entry point from Programming or CS fundamentals.', t:35, x:'https://teachyourselfcs.com/', u:'read' },
+        { n:'OSSU — set up the curriculum tracker for yourself', d:'github.com/ossu/computer-science: read the README fully, understand Intro CS vs Core CS, and pick your first course.', t:30, x:'https://github.com/ossu/computer-science', u:'read' },
+        { n:'Nand2Tetris — Project 1: build logic gates', d:'nand2tetris.org: complete Project 1, building elementary logic gates from a single NAND gate. This is where "how computers work" stops being abstract.', t:60, x:'https://www.nand2tetris.org/', u:'build' }
+      ],
+      compile:[
+        { n:'Nand2Tetris — Projects 2 & 3: ALU and memory', d:'Build the arithmetic logic unit and sequential memory chips. Nobody who does this forgets what a computer actually is afterward.', t:70, x:'https://www.nand2tetris.org/', u:'build' },
+        { n:'MIT OCW — one full lecture from Intro to Algorithms', d:'ocw.mit.edu: watch one full lecture from 6.006 (Introduction to Algorithms). Take handwritten notes, no typing.', t:50, x:'https://ocw.mit.edu/', u:'read' },
+        { n:'OSSU — finish your first Intro CS course', d:'Complete whichever Intro CS course you selected in the curriculum. Log your completion in the OSSU tracker.', t:65, x:'https://github.com/ossu/computer-science', u:'read' }
+      ],
+      link:[
+        { n:'Nand2Tetris — Projects 5–6: CPU and assembler', d:'Build the full CPU architecture and a working assembler. This is genuinely one of the best exercises in all of self-taught CS.', t:80, x:'https://www.nand2tetris.org/', u:'build' },
+        { n:'Teach Yourself CS — Operating Systems section', d:'Follow the recommended Operating Systems resource on teachyourselfcs.com. Focus on processes, memory, and file systems.', t:65, x:'https://teachyourselfcs.com/', u:'read' },
+        { n:'MIT OCW — one lecture on computer architecture', d:'Watch a lecture covering how the CPU, memory, and buses interact. Sketch the whole pipeline from memory afterward.', t:45, x:'https://ocw.mit.edu/', u:'read' }
+      ],
+      ship:[
+        { n:'Nand2Tetris — write about what you built', d:'Write a short explainer of your Nand2Tetris build: NAND gate to working CPU. This is a genuinely impressive portfolio piece.', t:50, x:'https://www.nand2tetris.org/', u:'ship' },
+        { n:'OSSU — complete one full course end to end', d:'Finish an entire course from the curriculum, assessments included, not just the lecture videos.', t:80, x:'https://github.com/ossu/computer-science', u:'read' },
+        { n:'Teach yourself one concept well enough to explain it in 5 minutes', d:'Pick the theory concept that confused you most this phase. Explain it out loud, unscripted, in under 5 minutes.', t:35, x:'https://teachyourselfcs.com/', u:'ship' }
+      ]
+    }
+  },
+  {
+    id:'tooling', nm:'Git, Terminal & Tooling', gl:'$_', tag:'shell · version control · the invisible skill',
+    cl:'#F0656B',
+    rs:[
+      ['Missing Semester (MIT)', 'https://missing.csail.mit.edu/', 'Course'],
+      ['OverTheWire: Bandit', 'https://overthewire.org/wargames/bandit/', 'Terminal Wargame'],
+      ['Pro Git (free book)', 'https://git-scm.com/book/en/v2', 'Reference'],
+      ['Learn Git Branching', 'https://learngitbranching.js.org/', 'Interactive']
+    ],
+    phases:{
+      boot:[
+        { n:'Missing Semester — Lecture 1: the shell', d:'missing.csail.mit.edu: watch Lecture 1 and complete its exercises in a real terminal, not a sandbox.', t:45, x:'https://missing.csail.mit.edu/', u:'read' },
+        { n:'OverTheWire Bandit — Levels 0 through 5', d:'overthewire.org/wargames/bandit: SSH in and clear the first 5 levels. Every command you learn here you will use for the rest of your life.', t:50, x:'https://overthewire.org/wargames/bandit/', u:'drill' },
+        { n:'Pro Git — Ch.1 & 2: Getting Started, Basics', d:'git-scm.com/book: read the first two chapters. Make your first real commits to a personal repo, not a tutorial clone.', t:40, x:'https://git-scm.com/book/en/v2', u:'git' }
+      ],
+      compile:[
+        { n:'Missing Semester — Lecture 6: Version Control (Git)', d:'Watch the Git lecture fully. It reframes git as a graph, which is the mental model that actually makes it click.', t:50, x:'https://missing.csail.mit.edu/', u:'read' },
+        { n:'Learn Git Branching — complete the Main track', d:'learngitbranching.js.org: clear the entire Main sequence — branching, merging, rebasing — visually before doing it for real.', t:55, x:'https://learngitbranching.js.org/', u:'drill' },
+        { n:'OverTheWire Bandit — Levels 6 through 14', d:'Continue the wargame. These levels introduce find, grep, cron, and basic scripting under pressure.', t:60, x:'https://overthewire.org/wargames/bandit/', u:'drill' }
+      ],
+      link:[
+        { n:'Missing Semester — Lectures 3 & 4: Editors, Data Wrangling', d:'Watch both lectures. Learn to pipe, grep, and sed your way through a messy file instead of opening it manually.', t:55, x:'https://missing.csail.mit.edu/', u:'read' },
+        { n:'Pro Git — Ch.3: Branching in Git', d:'Read the full branching chapter. Deliberately create a merge conflict on a scratch repo and resolve it by hand.', t:45, x:'https://git-scm.com/book/en/v2', u:'git' },
+        { n:'OverTheWire Bandit — Levels 15 through 24', d:'These levels get genuinely hard — SSL certs, brute force, port scanning basics. Take notes on every technique you use.', t:70, x:'https://overthewire.org/wargames/bandit/', u:'drill' }
+      ],
+      ship:[
+        { n:'Missing Semester — remaining lectures of your choice', d:'Pick 2 remaining lectures most relevant to you (Security, Metaprogramming, or Version Control deep dive) and complete them.', t:55, x:'https://missing.csail.mit.edu/', u:'read' },
+        { n:'Clean up your git history on a real project', d:'Take a messy personal repo and rewrite its commit history into something a reviewer would actually respect: clear messages, logical chunks.', t:45, x:'https://git-scm.com/book/en/v2', u:'git' },
+        { n:'OverTheWire Bandit — push as far as you can', d:'Continue as far into the wargame as you can this phase. Document the techniques you used in a personal notes file.', t:65, x:'https://overthewire.org/wargames/bandit/', u:'drill' }
+      ]
+    }
+  },
+  {
+    id:'career', nm:'Open Source & Career', gl:'◈', tag:'portfolio · contributions · proof of work',
+    cl:'#38BDF8',
+    rs:[
+      ['GitHub', 'https://github.com/', 'Host Your Work'],
+      ['roadmap.sh', 'https://roadmap.sh/', 'Career Roadmaps'],
+      ['freeCodeCamp Certifications', 'https://www.freecodecamp.org/learn', 'Verified Certs'],
+      ['First Timers Only', 'https://www.firsttimersonly.com/', 'First PRs']
+    ],
+    phases:{
+      boot:[
+        { n:'Set up GitHub properly — profile README + pin 3 repos', d:'github.com: write a real profile README, pin your 3 strongest repos, and make sure every one has a clear description.', t:30, x:'https://github.com/', u:'ship' },
+        { n:'roadmap.sh — pick your target role roadmap', d:'roadmap.sh: choose the roadmap matching where you want to end up (Frontend, Backend, Full Stack, or AI Engineer) and study its structure.', t:25, x:'https://roadmap.sh/', u:'read' },
+        { n:'First Timers Only — read the guide, find one candidate issue', d:'firsttimersonly.com: read the full guide on making a first contribution. Bookmark one real "good first issue" you could eventually tackle.', t:30, x:'https://www.firsttimersonly.com/', u:'read' }
+      ],
+      compile:[
+        { n:'Make your first real open-source contribution', d:'Submit an actual pull request — documentation fixes count. Follow the project\'s CONTRIBUTING.md exactly.', t:60, x:'https://www.firsttimersonly.com/', u:'ship' },
+        { n:'freeCodeCamp — earn one full certification', d:'freecodecamp.org/learn: complete an entire certification track including all required projects.', t:70, x:'https://www.freecodecamp.org/learn', u:'build' },
+        { n:'roadmap.sh — fill the gaps your roadmap reveals', d:'Compare your roadmap against what you\'ve actually studied. Pick the single biggest gap and schedule it into next phase.', t:30, x:'https://roadmap.sh/', u:'read' }
+      ],
+      link:[
+        { n:'Contribute to 2 more open-source issues', d:'Go beyond documentation this time — pick issues tagged "good first issue" that involve actual code changes.', t:65, x:'https://www.firsttimersonly.com/', u:'ship' },
+        { n:'Write 3 GitHub READMEs worth showing a recruiter', d:'Go back through your repos and rewrite the READMEs: what it does, why you built it, how to run it, what you\'d improve.', t:45, x:'https://github.com/', u:'ship' },
+        { n:'freeCodeCamp — start a second certification track', d:'Begin a certification adjacent to your strongest track (e.g. if you did Frontend, try Data Analysis or APIs).', t:50, x:'https://www.freecodecamp.org/learn', u:'build' }
+      ],
+      ship:[
+        { n:'Ship your capstone: the single best thing you built this protocol', d:'Pick your strongest project across all 90 days. Polish it until it is genuinely presentable — deployed, documented, demo-able.', t:85, x:'https://github.com/', u:'ship' },
+        { n:'Publish a written retrospective of the 90 days', d:'Write down what you actually learned, what surprised you, and what you\'d do differently. Future-you will thank present-you.', t:40, x:'https://roadmap.sh/', u:'ship' },
+        { n:'Open-source contribution #4 — aim slightly bigger', d:'One more contribution, this time to a project you actually use and care about, not just one convenient for practice.', t:60, x:'https://www.firsttimersonly.com/', u:'ship' }
+      ]
+    }
+  }
+];
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════ */
+const NS = 'stack_v1';
+const GHNS = 'stack_gh_cfg';
+// Local calendar date (no UTC-offset anchor) — avoids DST/timezone drift because
+// the diff below compares midnight-to-midnight in the user's own local time,
+// rather than dividing raw milliseconds by a fixed 24h constant.
+const START = new Date(2026, 6, 3); // July 3, 2026 (month is 0-indexed)
+const TOTAL_DAYS = 50;
+
+function defState(){ return { xp:0, streak:1, lastDate:new Date().toDateString(), tasksTotal:0, trackSessions:{}, trackProgress:{}, dailyTasks:{}, manualDay:null, badges:{} }; }
+let state = loadState();
+function loadState(){ try{ return Object.assign(defState(), JSON.parse(localStorage.getItem(NS)||'{}')); }catch(e){ return defState(); } }
+function saveState(){ localStorage.setItem(NS, JSON.stringify(state)); scheduleSync(); }
+
+function midnight(d){ var x = new Date(d); x.setHours(0,0,0,0); return x; }
+function calcTodayDay(){
+  const diff = Math.round((midnight(new Date()) - midnight(START)) / 86400000) + 1;
+  return Math.max(1, Math.min(TOTAL_DAYS, diff));
+}
+let currentDay = state.manualDay || calcTodayDay();
+
+// Streak decay: a streak is only "live" if the last completed task was today or
+// yesterday. Previously this only got corrected the next time a task was
+// checked off, so a broken streak kept displaying its old (stale) number until
+// the user acted. Now it's validated once up front, before the first render.
+function checkStreakDecay(){
+  var today = midnight(new Date());
+  var last = midnight(new Date(state.lastDate));
+  var diffDays = Math.round((today - last) / 86400000);
+  if(diffDays >= 2){ state.streak = 0; saveState(); }
+}
+
+function getPhaseForDay(d){
+  for(const p of PHASES){ if(d >= p.s && d <= p.e) return p; }
+  return PHASES[PHASES.length-1];
+}
+
+/* ═══════════════════════════════════════════════════════
+   GITHUB SYNC (mirrors the Polyglot Protocol pattern)
+   ═══════════════════════════════════════════════════════ */
+var ghConfig = {};
+var ghSha = null;
+var _ghTimer = null;
+
+function loadGHConfig(){ try{ var s = localStorage.getItem(GHNS); if(s) ghConfig = JSON.parse(s); }catch(e){} }
+function setSyncStatus(s){
+  var dot = document.getElementById('gh-dot'); var lbl = document.getElementById('gh-label');
+  if(!dot||!lbl) return;
+  dot.className = 'gh-dot ' + s;
+  var map = {idle:'SYNC', synced:'SYNCED', syncing:'SYNC…', error:'ERROR', unconfigured:'SYNC'};
+  lbl.textContent = map[s] || 'SYNC';
+}
+async function ghLoad(){
+  if(!ghConfig.token||!ghConfig.user||!ghConfig.repo) return null;
+  setSyncStatus('syncing');
+  try{
+    var path = ghConfig.path || 'stack_progress.json';
+    var r = await fetch('https://api.github.com/repos/'+ghConfig.user+'/'+ghConfig.repo+'/contents/'+path, {
+      headers:{Authorization:'token '+ghConfig.token, Accept:'application/vnd.github.v3+json'}
+    });
+    if(!r.ok){ setSyncStatus(r.status===401?'error':'idle'); return null; }
+    var data = await r.json();
+    ghSha = data.sha;
+    setSyncStatus('synced');
+    return JSON.parse(atob(data.content.replace(/\s/g,'')));
+  }catch(e){ setSyncStatus('error'); return null; }
+}
+async function ghSave(){
+  if(!ghConfig.token||!ghConfig.user||!ghConfig.repo) return;
+  setSyncStatus('syncing');
+  try{
+    var path = ghConfig.path || 'stack_progress.json';
+    var body = { message:'Stack Protocol progress '+new Date().toISOString().slice(0,10), content:btoa(unescape(encodeURIComponent(JSON.stringify(state,null,2)))) };
+    if(ghSha) body.sha = ghSha;
+    var r = await fetch('https://api.github.com/repos/'+ghConfig.user+'/'+ghConfig.repo+'/contents/'+path, {
+      method:'PUT', headers:{Authorization:'token '+ghConfig.token, Accept:'application/vnd.github.v3+json', 'Content-Type':'application/json'}, body:JSON.stringify(body)
+    });
+    if(r.ok){ var d = await r.json(); if(d.content) ghSha = d.content.sha; setSyncStatus('synced'); } else setSyncStatus('error');
+  }catch(e){ setSyncStatus('error'); }
+}
+function scheduleSync(){ if(!ghConfig.token) return; clearTimeout(_ghTimer); _ghTimer = setTimeout(ghSave, 4000); }
+window.openGHModal = function(){
+  var o = document.getElementById('gh-overlay'); if(!o) return;
+  document.getElementById('gh-user').value = ghConfig.user||'';
+  document.getElementById('gh-repo').value = ghConfig.repo||'';
+  document.getElementById('gh-token').value = ghConfig.token||'';
+  o.classList.add('open');
+};
+window.closeGHModal = function(){ var o = document.getElementById('gh-overlay'); if(o) o.classList.remove('open'); };
+window.saveGHConfig = async function(){
+  var cfg = { user:document.getElementById('gh-user').value.trim(), repo:document.getElementById('gh-repo').value.trim(), token:document.getElementById('gh-token').value.trim(), path:'stack_progress.json' };
+  if(!cfg.user||!cfg.repo||!cfg.token){ alert('Fill in all three fields.'); return; }
+  localStorage.setItem(GHNS, JSON.stringify(cfg)); ghConfig = cfg; closeGHModal();
+  var cloud = await ghLoad();
+  if(cloud){ state = Object.assign(loadState(), cloud); localStorage.setItem(NS, JSON.stringify(state)); render(); toast('☁ Progress loaded from GitHub'); }
+  else { await ghSave(); toast('☁ GitHub connected — syncing automatically'); }
+};
+
+/* ═══════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════ */
+function toast(msg){
+  var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._toastT); window._toastT = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function xpForLevel(l){ return l * 500; }
+function updateStats(){
+  document.getElementById('cd-d').textContent = String(currentDay).padStart(2,'0');
+  document.getElementById('cd-left').textContent = TOTAL_DAYS - currentDay;
+  document.getElementById('stat-xp').textContent = state.xp;
+  document.getElementById('stat-streak').textContent = state.streak;
+  document.getElementById('stat-tasks').textContent = state.tasksTotal;
+  var totalRes = TRACKS.reduce((s,t)=>s+t.rs.length,0);
+  document.getElementById('stat-res').textContent = totalRes;
+
+  var lvl = Math.max(1, Math.floor(state.xp/500)+1);
+  var cur = state.xp - (lvl-1)*500;
+  document.getElementById('lvl-num').textContent = lvl;
+  document.getElementById('xp-txt').textContent = cur + ' / 500 XP';
+  document.getElementById('xp-fill').style.width = Math.min(100,(cur/500)*100)+'%';
+
+  var ph = getPhaseForDay(currentDay);
+  document.getElementById('day-disp').textContent = 'Day '+currentDay+' · '+ph.nm+' Phase';
+  document.getElementById('phase-title').textContent = 'Phase '+(PHASES.indexOf(ph)+1)+' · '+ph.nm;
+  document.getElementById('phase-desc').textContent = ph.desc;
+
+  checkBadges();
+}
+
+function buildPhaseBar(){
+  var el = document.getElementById('phase-bar');
+  el.innerHTML = PHASES.map(p=>{
+    var active = currentDay>=p.s && currentDay<=p.e;
+    return '<div class="ph-chip'+(active?' active':'')+'" style="border-color:'+p.c+';color:'+p.c+(active?';background:'+p.c+'18':'')+'">'+p.nm.toUpperCase()+' · D'+p.s+'–'+p.e+'</div>';
+  }).join('');
+}
+
+function buildCommitGrid(){
+  var g = document.getElementById('commit-grid');
+  var todayN = calcTodayDay();
+  var html = '';
+  for(let d=1; d<=TOTAL_DAYS; d++){
+    var ph = getPhaseForDay(d);
+    var count = 0, total = 0;
+    TRACKS.forEach(tr=>{
+      var tasks = tr.phases[ph.key] || [];
+      total += tasks.length;
+      tasks.forEach((task,ti)=>{
+        var key = 'd'+d+'_'+tr.id+'_'+ph.key+'_t'+ti;
+        if(state.dailyTasks[key]) count++;
+      });
+    });
+    var cls = 'commit-cell';
+    if(d === currentDay) cls += ' current';
+    else if(d > todayN) cls += ' future';
+    if(count>0 && count>=total) cls += ' done';
+    else if(count>0) cls += ' partial';
+    html += '<div class="'+cls+'" onclick="jumpDay('+d+')" title="Day '+d+' · '+ph.nm+' · '+count+'/'+total+' tasks"></div>';
+  }
+  g.innerHTML = html;
+}
+
+window.jumpDay = function(d){ currentDay = d; state.manualDay = d; saveState(); render(); };
+
+function buildTracks(){
+  var grid = document.getElementById('domain-grid');
+  var ph = getPhaseForDay(currentDay);
+  grid.innerHTML = '';
+  TRACKS.forEach((tr, idx)=>{
+    var pct = Math.round(state.trackProgress[tr.id] || 0);
+    var sessions = state.trackSessions[tr.id] || 0;
+    var tasks = tr.phases[ph.key] || [];
+    var totalXP = tasks.reduce((s,t)=>s+(t.t||0),0);
+
+    var resHtml = tr.rs.map(r=>'<a class="res-a" href="'+r[1]+'" target="_blank" rel="noopener"><span>'+r[0]+'</span><span class="res-type">'+r[2]+'</span></a>').join('');
+
+    var tasksHtml = tasks.map((task,ti)=>{
+      var key = 'd'+currentDay+'_'+tr.id+'_'+ph.key+'_t'+ti;
+      var done = state.dailyTasks[key] || false;
+      var xpClass = 'xp-'+(task.u||'build');
+      return '<div class="task-row'+(done?' done':'')+'" onclick="toggleTask(\''+tr.id+'\',\''+key+'\','+(task.t||0)+',this)">'+
+        '<div class="t-chk"></div>'+
+        '<div class="task-body"><div class="task-name">'+task.n+'</div><div class="task-desc">'+task.d+'</div></div>'+
+        '<div class="task-xp-badge '+xpClass+'">+'+(task.t||0)+'</div></div>';
+    }).join('');
+
+    var card = document.createElement('div');
+    card.className = 'dc';
+    card.style.cssText = '--dc:'+tr.cl+';--dc-glow:'+tr.cl+'22';
+    card.style.animationDelay = (idx*.05)+'s';
+    card.innerHTML =
+      '<div class="dc-head">'+
+        '<div class="dc-glyph">'+tr.gl+'</div>'+
+        '<div class="dc-meta"><div class="dc-name">'+tr.nm+'</div><div class="dc-tag">'+tr.tag+'</div></div>'+
+        '<div class="dc-right"><button class="sess-btn" onclick="gainSession(\''+tr.id+'\',40,this)">+40 XP</button><div class="phase-pill">'+ph.nm+'</div></div>'+
+      '</div>'+
+      '<div class="dc-prog-wrap"><div class="dc-prog-top"><span>Track Progress</span><span class="dc-prog-pct">'+pct+'%</span></div><div class="dc-track"><div class="dc-fill" style="width:'+pct+'%"></div></div></div>'+
+      '<div class="dc-res"><div class="res-title">VERIFIED RESOURCES</div><div class="res-list">'+resHtml+'</div></div>'+
+      '<div class="task-section"><div class="task-header"><div class="task-title-lbl">DAY '+currentDay+' TASKS · '+ph.nm.toUpperCase()+'</div><div class="task-xp-total">'+totalXP+' XP available</div></div>'+tasksHtml+'</div>';
+    grid.appendChild(card);
+  });
+}
+
+window.toggleTask = function(trackId, key, xp, el){
+  var was = !!state.dailyTasks[key];
+  state.dailyTasks[key] = !was;
+  if(!was){
+    state.xp += xp;
+    state.tasksTotal += 1;
+    state.trackProgress[trackId] = Math.min(100, (state.trackProgress[trackId]||0) + 1.4);
+    el.classList.add('done');
+    bumpStreak();
+  } else {
+    state.xp = Math.max(0, state.xp - xp);
+    state.tasksTotal = Math.max(0, state.tasksTotal - 1);
+    state.trackProgress[trackId] = Math.max(0, (state.trackProgress[trackId]||0) - 1.4);
+    el.classList.remove('done');
+  }
+  saveState();
+  updateStats();
+  buildCommitGrid();
+  var pctEl = el.closest('.dc').querySelector('.dc-prog-pct');
+  var fillEl = el.closest('.dc').querySelector('.dc-fill');
+  var newPct = Math.round(state.trackProgress[trackId]||0);
+  if(pctEl) pctEl.textContent = newPct+'%';
+  if(fillEl) fillEl.style.width = newPct+'%';
+};
+
+window.gainSession = function(trackId, xp, btn){
+  state.xp += xp;
+  state.trackSessions[trackId] = (state.trackSessions[trackId]||0) + 1;
+  saveState(); updateStats();
+  btn.textContent = '+'+xp+' ✓';
+  setTimeout(()=>{ btn.textContent = '+40 XP'; }, 900);
+  toast('+'+xp+' XP logged for extra session');
+};
+
+function bumpStreak(){
+  var today = new Date().toDateString();
+  if(state.lastDate !== today){
+    var y = new Date(); y.setDate(y.getDate()-1);
+    state.streak = (state.lastDate === y.toDateString()) ? state.streak+1 : 1;
+    state.lastDate = today;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   BADGES
+   ═══════════════════════════════════════════════════════ */
+const BADGES = [
+  { id:'first', icon:'⌗', txt:'First Commit', check:()=>state.tasksTotal>=1 },
+  { id:'streak7', icon:'🔥', txt:'7-Day Streak', check:()=>state.streak>=7 },
+  { id:'level5', icon:'▲', txt:'Level 5', check:()=>state.xp>=2000 },
+  { id:'trackdone', icon:'◆', txt:'Track Shipped', check:()=>Object.values(state.trackProgress).some(p=>p>=100) },
+  { id:'fullstack', icon:'⬡', txt:'All Six Active', check:()=>TRACKS.every(t=>(state.trackSessions[t.id]||0)>0 || Object.keys(state.dailyTasks).some(k=>k.includes('_'+t.id+'_')&&state.dailyTasks[k])) }
+];
+function checkBadges(){
+  var row = document.getElementById('badge-row');
+  row.innerHTML = BADGES.map(b=>{
+    var unlocked = b.check();
+    if(unlocked && !state.badges[b.id]){ state.badges[b.id]=true; saveState(); toast(b.icon+' Achievement unlocked: '+b.txt); }
+    return '<div class="badge'+(unlocked?' unlocked':'')+'"><span class="badge-icon">'+b.icon+'</span><span class="badge-txt">'+b.txt+'</span></div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   HERO EASTER EGGS
+   ═══════════════════════════════════════════════════════ */
+const BOOT_LINES = [
+  'mounting six tracks...',
+  'linking curriculum against verified sources...',
+  'checking for gaps... none found.',
+  'ready.'
+];
+function typewriterBoot(){
+  var el = document.getElementById('boot-text');
+  var line = 0, char = 0;
+  function step(){
+    if(line >= BOOT_LINES.length){ setTimeout(()=>{ line=0; char=0; el.textContent=''; step(); }, 4000); return; }
+    var txt = BOOT_LINES[line];
+    if(char <= txt.length){ el.textContent = txt.slice(0,char); char++; setTimeout(step, 32); }
+    else { setTimeout(()=>{ line++; char=0; el.textContent=''; step(); }, 700); }
+  }
+  step();
+}
+
+const QUOTES = [
+  'every senior engineer was once a person who refused to close the tab.',
+  'the bug is never where you think it is. check anyway.',
+  'a green test suite is not proof. it is just the absence of proof otherwise.',
+  'the terminal is not scary. the terminal has just never been introduced to you properly.',
+  'ship the ugly version. you can\'t improve what doesn\'t exist yet.',
+  'reading someone else\'s stack trace is a skill. it gets easier, not shorter.'
+];
+let qIdx = 0;
+document.getElementById('hero-title').addEventListener('click', function(){
+  qIdx = (qIdx+1) % QUOTES.length;
+  var el = document.getElementById('hero-quote');
+  el.style.opacity = 0;
+  setTimeout(()=>{ el.textContent = QUOTES[qIdx]; el.style.opacity = 1; }, 200);
+});
+
+console.log('nice, you found the real terminal.');
+console.log('type state in devtools if you want to peek at your own progress object.');
+window.state = state;
+
+/* ═══════════════════════════════════════════════════════
+   BACKGROUND: drifting network / packet nodes
+   ═══════════════════════════════════════════════════════ */
+(function(){
+  var canvas = document.getElementById('net');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var nodes = [];
+  function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', function(){ resize(); initNodes(); });
+  function initNodes(){
+    nodes = [];
+    var n = Math.floor((canvas.width*canvas.height)/32000);
+    for(var i=0;i<n;i++){
+      nodes.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-.5)*.15, vy:(Math.random()-.5)*.15, r:Math.random()*1.6+1 });
+    }
+  }
+  initNodes();
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    nodes.forEach(function(a){
+      a.x+=a.vx; a.y+=a.vy;
+      if(a.x<0)a.x=canvas.width; if(a.x>canvas.width)a.x=0;
+      if(a.y<0)a.y=canvas.height; if(a.y>canvas.height)a.y=0;
+    });
+    for(var i=0;i<nodes.length;i++){
+      for(var j=i+1;j<nodes.length;j++){
+        var a=nodes[i], b=nodes[j];
+        var dx=a.x-b.x, dy=a.y-b.y, dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<130){
+          ctx.strokeStyle = 'rgba(79,209,197,'+((1-dist/130)*.12).toFixed(3)+')';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(function(a){
+      ctx.beginPath(); ctx.arc(a.x,a.y,a.r,0,Math.PI*2);
+      ctx.fillStyle = 'rgba(79,209,197,.35)'; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ═══════════════════════════════════════════════════════
+   NAV WIRING
+   ═══════════════════════════════════════════════════════ */
+document.getElementById('day-prev').addEventListener('click', function(){
+  if(currentDay>1){ currentDay--; state.manualDay=currentDay; saveState(); render(); }
+});
+document.getElementById('day-next').addEventListener('click', function(){
+  if(currentDay<TOTAL_DAYS){ currentDay++; state.manualDay=currentDay; saveState(); render(); }
+});
+document.getElementById('today-btn').addEventListener('click', function(){
+  currentDay = calcTodayDay(); state.manualDay = null; saveState(); render();
+  document.getElementById('tracks').scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('reset-btn').addEventListener('click', function(){
+  if(confirm('Reset ALL progress? This cannot be undone.')){
+    localStorage.removeItem(NS);
+    state = defState();
+    currentDay = calcTodayDay();
+    render();
+    toast('Reset complete');
+  }
+});
+
+function render(){
+  buildPhaseBar();
+  buildCommitGrid();
+  buildTracks();
+  updateStats();
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════ */
+loadGHConfig();
+setSyncStatus(ghConfig && ghConfig.token ? 'idle' : 'unconfigured');
+typewriterBoot();
+checkStreakDecay();
+document.getElementById('domain-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;font-family:var(--mono);font-size:11px;color:var(--id);padding:30px">loading tracks…</div>';
+
+(async()=>{
+  if(ghConfig && ghConfig.token){
+    try{
+      var cloud = await ghLoad();
+      if(cloud){
+        state = Object.assign(loadState(), cloud);
+        localStorage.setItem(NS, JSON.stringify(state));
+        var rt = calcTodayDay();
+        if(!state.manualDay || Math.abs(state.manualDay-rt)>3){ state.manualDay=null; currentDay=rt; }
+      }
+    }catch(e){ console.warn('GitHub load failed:', e); }
+  }
+  render();
+})();
+
+})();
+</script>
+</body>
+</html>
